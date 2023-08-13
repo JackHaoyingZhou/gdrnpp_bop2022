@@ -27,12 +27,12 @@ imgaug>=0.4.0
 albumentations
 transforms3d
 # pyquaternion
-torchvision
+# torchvision
 open3d
 fvcore
 tensorboardX
 einops
-pytorch3d
+# pytorch3d
 timm==0.6.7
 glfw
 imageio
@@ -45,7 +45,7 @@ thop  # https://github.com/Lyken17/pytorch-OpCounter
 loguru
 
 
-pytorch-lightning  # tested for 1.6.0.dev0
+pytorch-lightning==1.8.5  # tested for 1.6.0.dev0 --> JUAN: I update this to 1.8.5
 fairscale
 deepspeed
 
