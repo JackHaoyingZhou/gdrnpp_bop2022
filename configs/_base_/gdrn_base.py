@@ -117,7 +117,7 @@ MODEL = dict(
             MASK_LOSS_TYPE="L1",  # L1 | BCE | CE | RW_BCE | dice
             MASK_LOSS_GT="trunc",  # trunc | visib | gt
             MASK_LW=1.0,
-            # region loss -------------------------
+            # Region loss -------------------------
             REGION_LOSS_TYPE="CE",  # CE
             REGION_LOSS_MASK_GT="visib",  # trunc | visib | obj
             REGION_LW=1.0,
