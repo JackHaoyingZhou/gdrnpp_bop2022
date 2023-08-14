@@ -62,6 +62,8 @@ gdrn test
 ./core/gdrn_modeling/test_gdrn.sh configs/gdrn/tudl/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl.py 0 ./output/pretrained/tudl/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl/model_final_wo_optim.pth
 ```
 
+6. For training, generated fps points for each dataset. See for example [tudl_1_comput_fps.py](./core/gdrn_modeling/tools/tudl/tudl_1_compute_fps.py)
+
 
 ## Compiling BOP_renderer
 
