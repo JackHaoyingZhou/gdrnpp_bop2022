@@ -559,7 +559,7 @@ class GDRN_DatasetFromList(Base_DatasetFromList):
         ## roi_xyz ----------------------------------------------------
         roi_xyz = crop_resize_by_warp_affine(xyz, bbox_center, scale, out_res, interpolation=mask_xyz_interp)
 
-        # region label
+        # Region label
         if g_head_cfg.NUM_REGIONS > 1:
             fps_points = self._get_fps_points(dataset_name)[roi_cls]
             roi_region = xyz_to_region(roi_xyz, fps_points)  # HW
