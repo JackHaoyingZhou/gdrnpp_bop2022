@@ -58,6 +58,7 @@ _DSET_MOD_NAMES = [
     "itodd_pbr",
     "itodd_bop_test",
     "itodd_d2",
+    "ambf_suturing"
 ]
 
 logger = logging.getLogger(__name__)

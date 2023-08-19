@@ -121,7 +121,7 @@ def vis_image_mask_bbox_cv2(
     img_show = img.copy()
     for i, mask in enumerate(masks):
         color_mask = np.random.randint(0, 256, (1, 3), dtype=np.uint8)
-        mask = mask.astype(np.bool)
+        mask = mask.astype(bool)
         img_show[mask] = img_show[mask] * 0.5 + color_mask * 0.5
         if bboxes is None:
             x1, y1, x2, y2 = mask2bbox_xyxy(mask)

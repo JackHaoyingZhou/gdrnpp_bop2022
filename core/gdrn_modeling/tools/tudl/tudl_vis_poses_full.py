@@ -58,13 +58,22 @@ ren = EGLRenderer(
     height=height,
 )
 
-pred_path = osp.join(
-    "output/gdrn/tudl/resnest50d_a6_AugCosyAAEGray_BG05_mlBCE_DoubleMask_tudl_real_pbr_40e/",
-    "all_tudl-test.csv",
-)
-vis_dir = "output/gdrn/tudl/resnest50d_a6_AugCosyAAEGray_BG05_mlBCE_DoubleMask_tudl_real_pbr_40e/vis"
+# pred_path = osp.join(
+#     "output/gdrn/tudl/resnest50d_a6_AugCosyAAEGray_BG05_mlBCE_DoubleMask_tudl_real_pbr_40e/",
+#     "all_tudl-test.csv",
+# )
+# vis_dir = "output/gdrn/tudl/resnest50d_a6_AugCosyAAEGray_BG05_mlBCE_DoubleMask_tudl_real_pbr_40e/vis"
 
-bbox_path = "datasets/BOP_DATASETS/tudl/test/test_bboxes/yolov4_tudl_pbr_bop.json"
+# bbox_path = "datasets/BOP_DATASETS/tudl/test/test_bboxes/yolov4_tudl_pbr_bop.json"
+
+pred_path = osp.join(
+    "output/gdrn/tudl/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl/",
+    "inference_model_final_wo_optim/tudl_bop_test/",
+    "convnext-a6-AugCosyAAEGray-BG05-mlL1-DMask-amodalClipBox-classAware-tudl-test-iter0_tudl-test.csv",
+)
+vis_dir = "output/gdrn/tudl/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl/vis"
+
+bbox_path = "datasets/BOP_DATASETS/tudl/test/test_bboxes/yolox_x_640_tudl_pbr_tudl_bop_test.json"
 
 mmcv.mkdir_or_exist(vis_dir)
 
