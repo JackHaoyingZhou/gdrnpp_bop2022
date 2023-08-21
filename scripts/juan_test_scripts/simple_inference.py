@@ -1,7 +1,9 @@
+from gdrn_simple.DatasetConfig import get_dataset_config
+from gdrn_simple.RenderClients import MyCppRenderer
 import sys
 
-core_path = "/home/jbarrag3/research_juan/gdr-net-6dpose/gdrnpp_bop2022_juan"
-sys.path.append(core_path)
+# core_path = "/home/jbarrag3/research_juan/gdr-net-6dpose/gdrnpp_bop2022_juan"
+# sys.path.append(core_path)
 
 from torch.cuda.amp import autocast
 import numpy as np
@@ -87,15 +89,31 @@ def load_dataset(cfg):
     return data_loader
 
 if __name__ == '__main__':
+    #pretrained model
+    # config_name = 'convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl'
+    # config_path = Path(f'configs/gdrn/tudl/{config_name}.py')
+    # weights_path = f'./output/pretrained/tudl/{config_name}/model_final_wo_optim.pth'
+    # weights_path = Path(weights_path)
+
+    # my trained model
+    ds_name = "tudl_bop_test"
     config_name = 'convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl'
     config_path = Path(f'configs/gdrn/tudl/{config_name}.py')
-    weights_path = f'./output/pretrained/tudl/{config_name}/model_final_wo_optim.pth'
+    weights_path = f'./output/gdrn/tudl/{config_name}_juan/model_final.pth'
     weights_path = Path(weights_path)
 
+    #Ambf suturing
+    # ds_name = "ambf_suturing"
+    # config_name = 'convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_ambf_suturing'
+    # config_path = Path(f'configs/gdrn/ambf_suturing/{config_name}.py')
+    # weights_path = f'./output/gdrn/ambf_suturing/{config_name}/model_0009219.pth'
+    # weights_path = Path(weights_path)
+
+    dataset_cfg = get_dataset_config(ds_name)
     cfg = Config.fromfile(config_path)
     cfg = setup(cfg)
     register_datasets_in_cfg(cfg)
-
+    print(f"loading model from {weights_path.parent}")
     print(cfg.MODEL.POSE_NET.NAME)
 
     model, optimizer = eval(cfg.MODEL.POSE_NET.NAME).build_model_optimizer(cfg, is_test=True)
@@ -158,61 +176,78 @@ if __name__ == '__main__':
     print(f"trans diff {gt_trans-pred_trans}")
     print(f"rot diff {gt_rot-pred_rot}")
 
-    ## Create renderer
-    id2obj = {1: "dragon", 2: "frog", 3: "can"}
-    objects = list(id2obj.values())
-    # Camera info
-    width = 640
-    height = 480
-    model_dir = "datasets/BOP_DATASETS/tudl/models/"
-    model_paths = [osp.join(model_dir, f"obj_{obj_id:06d}.ply") for obj_id in id2obj]
-
-    tensor_kwargs = {"device": torch.device("cuda"), "dtype": torch.float32}
-    image_tensor = torch.empty((height, width, 4), **tensor_kwargs).detach()
-    seg_tensor = torch.empty((height, width, 4), **tensor_kwargs).detach()
-
-    ren = EGLRenderer(
-        model_paths,
-        vertex_scale=0.001,
-        use_cache=True,
-        width=width,
-        height=height,
-    )
-
-    ##Render
+    ## Pose data for rendenring
     s2 = s2[0]
     K = s2["cam"][0]
-    file_name = s2["file_name"][0]
-    scene_im_id = s2["scene_im_id"][0] #  e.g. 1/0 for scene 1 and img 0
-    print(file_name)
-    img = read_image_mmcv(file_name, format="BGR")
     est_pose = np.hstack([pred_rot, pred_trans.reshape(3, 1)])
-    est_label = 0
+    file_name = s2["file_name"][0]
+    im = read_image_mmcv(file_name, format="BGR")
 
-    im_gray = mmcv.bgr2gray(img, keepdim=True)
-    im_gray_3 = np.concatenate([im_gray, im_gray, im_gray], axis=2)
+    ## Create renderer
+    renderer = MyCppRenderer("cpp", dataset_cfg.MODEL_PATHS, dataset_cfg.OBJID, width=640, height=480)
+    ren_rgb, ren_depth = renderer.render(0, K, est_pose)
+    ren_rgb = cv2.addWeighted(im, 0.3, ren_rgb, 0.7, 0)
 
-    ren.render(
-        est_label,
-        est_pose,
-        K=K,
-        image_tensor=image_tensor,
-        background=im_gray_3,
-    )
-    ren_bgr = (image_tensor[:, :, :3].detach().cpu().numpy() + 0.5).astype("uint8")
+    ####################################################3
+    ## OLD complicated way of rendering
+    # # id2obj = {1: "dragon", 2: "frog", 3: "can"}
+    # id2obj = {1: "needle"}
+    # objects = list(id2obj.values())
 
-    ##Actual rendering of predictions
-    ren.render([est_label], [est_pose], K=K, seg_tensor=seg_tensor)
-    est_mask = (seg_tensor[:, :, 0].detach().cpu().numpy() > 0).astype("uint8")
-    est_edge = get_edge(est_mask, bw=3, out_channel=1)
-    ren_bgr[est_edge != 0] = np.array(mmcv.color_val("green"))
+    # # Camera info
+    # width = 640
+    # height = 480
+    # model_dir = "datasets/BOP_DATASETS/ambf_suturing/models/"
+    # model_paths = [osp.join(model_dir, f"obj_{obj_id:06d}.ply") for obj_id in id2obj]
 
-    vis_im = ren_bgr
+    # tensor_kwargs = {"device": torch.device("cuda"), "dtype": torch.float32}
+    # image_tensor = torch.empty((height, width, 4), **tensor_kwargs).detach()
+    # seg_tensor = torch.empty((height, width, 4), **tensor_kwargs).detach()
+
+    # ren = EGLRenderer(
+    #     model_paths,
+    #     vertex_scale=0.001,
+    #     use_cache=True,
+    #     width=width,
+    #     height=height,
+    # )
+
+    # ##Render
+    # s2 = s2[0]
+    # K = s2["cam"][0]
+    # file_name = s2["file_name"][0]
+    # scene_im_id = s2["scene_im_id"][0] #  e.g. 1/0 for scene 1 and img 0
+    # print(file_name)
+    # img = read_image_mmcv(file_name, format="BGR")
+    # est_pose = np.hstack([pred_rot, pred_trans.reshape(3, 1)])
+    # gt_pose = np.hstack([gt_rot, gt_trans.reshape(3, 1)])
+    # est_label = 0
+
+    # im_gray = mmcv.bgr2gray(img, keepdim=True)
+    # im_gray_3 = np.concatenate([im_gray, im_gray, im_gray], axis=2)
+
+    # ren.render(
+    #     est_label,
+    #     gt_pose,
+    #     K=K,
+    #     image_tensor=image_tensor,
+    #     background=im_gray_3,
+    # )
+    # ren_bgr = (image_tensor[:, :, :3].detach().cpu().numpy() + 0.5).astype("uint8")
+
+    # ##Actual rendering of predictions
+    # ren.render([est_label], [est_pose], K=K, seg_tensor=seg_tensor)
+    # est_mask = (seg_tensor[:, :, 0].detach().cpu().numpy() > 0).astype("uint8")
+    # est_edge = get_edge(est_mask, bw=3, out_channel=1)
+    # ren_bgr[est_edge != 0] = np.array(mmcv.color_val("green"))
+    ###################################################################################
+
+    vis_im = ren_rgb
 
     show = True 
     if show:
         # im_show = cv2.hconcat([img, vis_im, vis_im_add])
-        im_show = cv2.hconcat([img, vis_im])
+        im_show = cv2.hconcat([im, vis_im])
         cv2.imshow("im_est", im_show)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
