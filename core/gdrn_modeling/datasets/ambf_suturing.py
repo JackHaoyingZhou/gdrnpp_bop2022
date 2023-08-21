@@ -102,10 +102,13 @@ class AMBF_SUTURING_Dataset(object):
         self.num_instances_without_valid_box = 0
         dataset_dicts = []  # ######################################################
         # it is slow because of loading and converting masks to rle
-        # targets = mmcv.load(self.ann_file)
-        ambf_img_list = list(range(0,111))
-        # scene_im_ids = [(item["scene_id"], item["im_id"]) for item in targets]
-        scene_im_ids = [(1, item) for item in ambf_img_list]
+
+        targets = mmcv.load(self.ann_file)
+        scene_im_ids = [(item["scene_id"], item["im_id"]) for item in targets]
+
+        # ambf_img_list = list(range(0,111))
+        # scene_im_ids = [(1, item) for item in ambf_img_list]
+
         scene_im_ids = sorted(list(set(scene_im_ids)))
 
         # load infos for each scene
@@ -322,7 +325,7 @@ SPLITS_AMBF = dict(
         dataset_root=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/train_env1"),
         models_root=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/models"),
         objs=AMBF_OBJECTS,
-        ann_file=osp.join(DATASETS_ROOT, "BOP_DATASETS/tudl/test_targets_bop19.json"),
+        ann_file=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/test_targets_bop19.json"),
         scale_to_meter=0.001,
         with_masks=True,  # (load masks but may not use it)
         with_depth=True,  # (load depth path here, but may not use it)
@@ -444,7 +447,7 @@ def test_vis():
                 labels=labels[_i : _i + 1],
             )
             img_vis_kpts2d = misc.draw_projected_box3d(img_vis.copy(), kpts_2d[_i])
-            if "test" not in dset_name.lower():
+            if "test" not in dset_name.lower() and False:
                 xyz_path = annos[_i]["xyz_path"]
                 xyz_info = mmcv.load(xyz_path)
                 x1, y1, x2, y2 = xyz_info["xyxy"]
