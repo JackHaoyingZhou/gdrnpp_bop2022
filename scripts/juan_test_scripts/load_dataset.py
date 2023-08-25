@@ -13,8 +13,11 @@ import cv2
 
 if __name__ == '__main__':
 
-    config_name = 'convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl'
-    config_path = Path(f'configs/gdrn/tudl/{config_name}.py')
+    # config_name = 'convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl'
+    # config_path = Path(f'configs/gdrn/tudl/{config_name}.py')
+
+    config_name = 'convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_ambf_suturing'
+    config_path = Path(f'configs/gdrn/ambf_suturing/{config_name}.py')
 
     cfg = Config.fromfile(config_path)
     # cfg = setup(cfg)
