@@ -220,8 +220,9 @@ class GDRN_Lite(LightningLite):
             optimizer=optimizer,
             scheduler=scheduler,
         )
-        if hasattr(self._precision_plugin, "scaler"):
-            extra_ckpt_dict["gradscaler"] = self._precision_plugin.scaler
+        # This fails with pytorch_lightning 1.8.5 - Juan
+        # if hasattr(self._precision_plugin, "scaler"): 
+        #     extra_ckpt_dict["gradscaler"] = self._precision_plugin.scaler
         checkpointer = MyCheckpointer(
             model,
             cfg.OUTPUT_DIR,
