@@ -33,6 +33,7 @@ from transforms3d.quaternions import quat2mat
 from lib.egl_renderer.egl_renderer_v3 import EGLRenderer
 import cv2
 from lib.utils.mask_utils import mask2bbox_xyxy, cocosegm2mask, get_edge
+import gdrn_simple.VisUtils as vis_utils
 
 def setup(cfg:Config)->Config:
     if cfg.SOLVER.OPTIMIZER_CFG != "":
@@ -88,6 +89,23 @@ def load_dataset(cfg):
 
     return data_loader
 
+def print_metrics():
+    print(f"scene_img_id {scene_img_id}")
+    print(f"category id {s2[0]['annotations'][0]['category_id']}" )
+    print(f"results for {s2[0]['file_name']}") 
+
+    print(f"predictions")
+    print(f"trans {pred_trans}")
+    print(f"rot {pred_rot}")
+
+    print(f"ground-truth")
+    print(f"trans {gt_trans}")
+    print(f"rot {gt_rot}")
+
+    print(f"diff")
+    print(f"trans diff {gt_trans-pred_trans}")
+    print(f"rot diff {gt_rot-pred_rot}")
+
 if __name__ == '__main__':
     #pretrained model
     # config_name = 'convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl'
@@ -96,18 +114,26 @@ if __name__ == '__main__':
     # weights_path = Path(weights_path)
 
     # my trained model
-    ds_name = "tudl_bop_test"
-    config_name = 'convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl'
-    config_path = Path(f'configs/gdrn/tudl/{config_name}.py')
-    weights_path = f'./output/gdrn/tudl/{config_name}_juan/model_final.pth'
-    weights_path = Path(weights_path)
+    # ds_name = "tudl_bop_test"
+    # config_name = 'convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl'
+    # config_path = Path(f'configs/gdrn/tudl/{config_name}.py')
+    # weights_path = f'./output/gdrn/tudl/{config_name}_juan/model_final.pth'
+    # weights_path = Path(weights_path)
 
-    #Ambf suturing
-    # ds_name = "ambf_suturing"
+    #Ambf suturing - small ds
+    # ds_name = "ambf_suturing_test"
     # config_name = 'convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_ambf_suturing'
     # config_path = Path(f'configs/gdrn/ambf_suturing/{config_name}.py')
     # weights_path = f'./output/gdrn/ambf_suturing/{config_name}/model_0009219.pth'
     # weights_path = Path(weights_path)
+
+    #Ambf suturing - big ds
+    ds_name = "ambf_suturing"
+    config_name = 'convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_ambf_suturing'
+    config_path = Path(f'configs/gdrn/ambf_suturing/{config_name}.py')
+    output_name = 'classAware_ambf_suturing_env1_automated1'
+    weights_path = f'./output/gdrn/ambf_suturing/{output_name}/model_final.pth'
+    weights_path = Path(weights_path)
 
     dataset_cfg = get_dataset_config(ds_name)
     cfg = Config.fromfile(config_path)
@@ -123,131 +149,69 @@ if __name__ == '__main__':
 
     data_loader = load_dataset(cfg)
 
-    # Sample bath
-    iterator = iter(data_loader)
-    s2 = next(iterator)
-    s2 = next(iterator)
-    batch = batch_data(cfg, s2, phase="test", device=cfg.MODEL.DEVICE)
-
-    
-    if cfg.INPUT.WITH_DEPTH and "depth" in cfg.MODEL.POSE_NET.NAME.lower():
-        print("using depth ...")
-        inp = torch.cat([batch["roi_img"], batch["roi_depth"]], dim=1)
-    else:
-        inp = batch["roi_img"]
-
-    print("inference")
-    with inference_context(model), torch.no_grad():
-        amp_test = False
-        with autocast(enabled=amp_test):
-            out_dict = model(
-                inp,
-                roi_classes=batch["roi_cls"],
-                roi_cams=batch["roi_cam"],
-                roi_whs=batch["roi_wh"],
-                roi_centers=batch["roi_center"],
-                resize_ratios=batch["resize_ratio"],
-                roi_coord_2d=batch.get("roi_coord_2d", None),
-                roi_coord_2d_rel=batch.get("roi_coord_2d_rel", None),
-                roi_extents=batch.get("roi_extent", None),
-            )
-
-    #### Analysis
-    pred_trans = out_dict['trans'][0].detach().cpu().numpy()
-    pred_rot = out_dict['rot'][0].detach().cpu().numpy()
-
-    gt_trans = s2[0]['annotations'][0]['trans']
-    gt_rot = quat2mat(s2[0]['annotations'][0]['quat'])
-
-    scene_img_id = f"{s2[0]['scene_im_id']}"
-    print(f"scene_img_id {scene_img_id}")
-    print(f"caterogy id {s2[0]['annotations'][0]['category_id']}" )
-    print(f"results for {s2[0]['file_name']}") 
-
-    print(f"predictions")
-    print(f"trans {pred_trans}")
-    print(f"rot {pred_rot}")
-
-    print(f"ground-truth")
-    print(f"trans {gt_trans}")
-    print(f"rot {gt_rot}")
-
-    print(f"diff")
-    print(f"trans diff {gt_trans-pred_trans}")
-    print(f"rot diff {gt_rot-pred_rot}")
-
-    ## Pose data for rendenring
-    s2 = s2[0]
-    K = s2["cam"][0]
-    est_pose = np.hstack([pred_rot, pred_trans.reshape(3, 1)])
-    file_name = s2["file_name"][0]
-    im = read_image_mmcv(file_name, format="BGR")
-
-    ## Create renderer
     renderer = MyCppRenderer("cpp", dataset_cfg.MODEL_PATHS, dataset_cfg.OBJID, width=640, height=480)
-    ren_rgb, ren_depth = renderer.render(0, K, est_pose)
-    ren_rgb = cv2.addWeighted(im, 0.3, ren_rgb, 0.7, 0)
 
-    ####################################################3
-    ## OLD complicated way of rendering
-    # # id2obj = {1: "dragon", 2: "frog", 3: "can"}
-    # id2obj = {1: "needle"}
-    # objects = list(id2obj.values())
+    # Sample bath
+    # iterator = iter(data_loader)
+    # s2 = next(iterator)
+    for s2 in data_loader:
+        batch = batch_data(cfg, s2, phase="test", device=cfg.MODEL.DEVICE)
+        
+        if cfg.INPUT.WITH_DEPTH and "depth" in cfg.MODEL.POSE_NET.NAME.lower():
+            print("using depth ...")
+            inp = torch.cat([batch["roi_img"], batch["roi_depth"]], dim=1)
+        else:
+            inp = batch["roi_img"]
 
-    # # Camera info
-    # width = 640
-    # height = 480
-    # model_dir = "datasets/BOP_DATASETS/ambf_suturing/models/"
-    # model_paths = [osp.join(model_dir, f"obj_{obj_id:06d}.ply") for obj_id in id2obj]
+        with inference_context(model), torch.no_grad():
+            amp_test = False
+            with autocast(enabled=amp_test):
+                out_dict = model(
+                    inp,
+                    roi_classes=batch["roi_cls"],
+                    roi_cams=batch["roi_cam"],
+                    roi_whs=batch["roi_wh"],
+                    roi_centers=batch["roi_center"],
+                    resize_ratios=batch["resize_ratio"],
+                    roi_coord_2d=batch.get("roi_coord_2d", None),
+                    roi_coord_2d_rel=batch.get("roi_coord_2d_rel", None),
+                    roi_extents=batch.get("roi_extent", None),
+                )
 
-    # tensor_kwargs = {"device": torch.device("cuda"), "dtype": torch.float32}
-    # image_tensor = torch.empty((height, width, 4), **tensor_kwargs).detach()
-    # seg_tensor = torch.empty((height, width, 4), **tensor_kwargs).detach()
+        #### Analysis
+        pred_trans = out_dict['trans'][0].detach().cpu().numpy()
+        pred_rot = out_dict['rot'][0].detach().cpu().numpy()
 
-    # ren = EGLRenderer(
-    #     model_paths,
-    #     vertex_scale=0.001,
-    #     use_cache=True,
-    #     width=width,
-    #     height=height,
-    # )
+        gt_trans = s2[0]['annotations'][0]['trans']
+        gt_rot = quat2mat(s2[0]['annotations'][0]['quat'])
 
-    # ##Render
-    # s2 = s2[0]
-    # K = s2["cam"][0]
-    # file_name = s2["file_name"][0]
-    # scene_im_id = s2["scene_im_id"][0] #  e.g. 1/0 for scene 1 and img 0
-    # print(file_name)
-    # img = read_image_mmcv(file_name, format="BGR")
-    # est_pose = np.hstack([pred_rot, pred_trans.reshape(3, 1)])
-    # gt_pose = np.hstack([gt_rot, gt_trans.reshape(3, 1)])
-    # est_label = 0
+        scene_img_id = f"{s2[0]['scene_im_id']}"
 
-    # im_gray = mmcv.bgr2gray(img, keepdim=True)
-    # im_gray_3 = np.concatenate([im_gray, im_gray, im_gray], axis=2)
+        print_metrics()
 
-    # ren.render(
-    #     est_label,
-    #     gt_pose,
-    #     K=K,
-    #     image_tensor=image_tensor,
-    #     background=im_gray_3,
-    # )
-    # ren_bgr = (image_tensor[:, :, :3].detach().cpu().numpy() + 0.5).astype("uint8")
+        ## Pose data for rendenring
+        s2 = s2[0]
+        K = s2["cam"][0]
+        obj_id = s2["annotations"][0]["category_id"]
+        est_pose = np.hstack([pred_rot, pred_trans.reshape(3, 1)])
 
-    # ##Actual rendering of predictions
-    # ren.render([est_label], [est_pose], K=K, seg_tensor=seg_tensor)
-    # est_mask = (seg_tensor[:, :, 0].detach().cpu().numpy() > 0).astype("uint8")
-    # est_edge = get_edge(est_mask, bw=3, out_channel=1)
-    # ren_bgr[est_edge != 0] = np.array(mmcv.color_val("green"))
-    ###################################################################################
+        gt_pose = s2["annotations"][0]["pose"]
+        file_name = s2["file_name"][0]
+        im = read_image_mmcv(file_name, format="BGR")
 
-    vis_im = ren_rgb
+        ## Create renderer
+        pred_rgb, ren_depth = renderer.render(obj_id, K, est_pose)
+        gt_rgb, gt_depth = renderer.render(obj_id, K, gt_pose)
+        
+        vis_im = vis_utils.vis_gt_and_pred(im, gt_rgb, pred_rgb)
+        # pred_rgb = cv2.addWeighted(im, 0.3, gt_rgb, 0.7, 0)
 
-    show = True 
-    if show:
-        # im_show = cv2.hconcat([img, vis_im, vis_im_add])
-        im_show = cv2.hconcat([im, vis_im])
-        cv2.imshow("im_est", im_show)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+
+        show = True 
+        if show:
+            cv2.imshow("im_est", vis_im)
+            k = cv2.waitKey(0)
+            if k == ord("q"):
+                cv2.destroyAllWindows()
+                break
+
