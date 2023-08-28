@@ -6,6 +6,7 @@ import os.path as osp
 import sys
 import time
 from collections import OrderedDict
+from typing import List
 import mmcv
 import numpy as np
 from tqdm import tqdm
@@ -44,7 +45,7 @@ class AMBF_SUTURING_Dataset(object):
         self.dataset_root = data_cfg.get("dataset_root", osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/train_env1"))
         assert osp.exists(self.dataset_root), self.dataset_root
 
-        self.ann_file = data_cfg["ann_file"]  # json file with scene_id and im_id items
+        # self.ann_file = data_cfg["ann_file"]  # json file with scene_id and im_id items
 
         self.models_root = data_cfg["models_root"]  # BOP_DATASETS/ambf_suturing/models
         self.scale_to_meter = data_cfg["scale_to_meter"]  # 0.001
@@ -59,6 +60,10 @@ class AMBF_SUTURING_Dataset(object):
         self.use_cache = data_cfg.get("use_cache", True)
         self.num_to_load = data_cfg["num_to_load"]  # -1
         self.filter_invalid = data_cfg.get("filter_invalid", True)
+
+        self.scene_id_list: List = data_cfg.get("scene_id_list", None)
+        assert self.scene_id_list is not None, "provide available scenes for ambf_suturing"
+
         ##################################################
 
         # NOTE: careful! Only the selected objects
@@ -103,19 +108,19 @@ class AMBF_SUTURING_Dataset(object):
         dataset_dicts = []  # ######################################################
         # it is slow because of loading and converting masks to rle
 
-        targets = mmcv.load(self.ann_file)
-        scene_im_ids = [(item["scene_id"], item["im_id"]) for item in targets]
+        # targets = mmcv.load(self.ann_file)
+        # scene_im_ids = [(item["scene_id"], item["im_id"]) for item in targets]
 
         # ambf_img_list = list(range(0,111))
         # scene_im_ids = [(1, item) for item in ambf_img_list]
 
-        scene_im_ids = sorted(list(set(scene_im_ids)))
+        # scene_im_ids = sorted(list(set(scene_im_ids)))
 
         # load infos for each scene
         gt_dicts = {}
         gt_info_dicts = {}
         cam_dicts = {}
-        for scene_id, im_id in scene_im_ids:
+        for scene_id in self.scene_id_list:
             scene_root = osp.join(self.dataset_root, f"{scene_id:06d}")
             if scene_id not in gt_dicts:
                 gt_dicts[scene_id] = mmcv.load(osp.join(scene_root, "scene_gt.json"))
@@ -124,107 +129,112 @@ class AMBF_SUTURING_Dataset(object):
             if scene_id not in cam_dicts:
                 cam_dicts[scene_id] = mmcv.load(osp.join(scene_root, "scene_camera.json"))
 
-        for scene_id, int_im_id in tqdm(scene_im_ids):
-            str_im_id = str(int_im_id)
-            scene_root = osp.join(self.dataset_root, f"{scene_id:06d}")
-
+        for scene_id in tqdm(self.scene_id_list):
             gt_dict = gt_dicts[scene_id]
-            gt_info_dict = gt_info_dicts[scene_id]
-            cam_dict = cam_dicts[scene_id]
 
-            rgb_path = osp.join(scene_root, "rgb/{:06d}.png").format(int_im_id)
-            assert osp.exists(rgb_path), rgb_path
+            for str_im_id in tqdm(gt_dict, postfix=f"{scene_id}"):
+                int_im_id = int(str_im_id)
 
-            depth_path = osp.join(scene_root, "depth/{:06d}.png".format(int_im_id))
+                str_im_id = str(int_im_id)
+                scene_root = osp.join(self.dataset_root, f"{scene_id:06d}")
 
-            scene_im_id = f"{scene_id}/{int_im_id}"
+                gt_dict = gt_dicts[scene_id]
+                gt_info_dict = gt_info_dicts[scene_id]
+                cam_dict = cam_dicts[scene_id]
 
-            K = np.array(cam_dict[str_im_id]["cam_K"], dtype=np.float32).reshape(3, 3)
-            depth_factor = 1000.0 / cam_dict[str_im_id]["depth_scale"]  # 10000
+                rgb_path = osp.join(scene_root, "rgb/{:06d}.png").format(int_im_id)
+                assert osp.exists(rgb_path), rgb_path
 
-            record = {
-                "dataset_name": self.name,
-                "file_name": osp.relpath(rgb_path, PROJ_ROOT),
-                "depth_file": osp.relpath(depth_path, PROJ_ROOT),
-                "height": self.height,
-                "width": self.width,
-                "image_id": int_im_id,
-                "scene_im_id": scene_im_id,  # for evaluation
-                "cam": K,
-                "depth_factor": depth_factor,
-                "img_type": "real",  # NOTE: has background
-            }
-            insts = []
-            for anno_i, anno in enumerate(gt_dict[str_im_id]):
-                obj_id = anno["obj_id"]
-                if obj_id not in self.cat_ids:
-                    continue
-                cur_label = self.cat2label[obj_id]  # 0-based label
-                R = np.array(anno["cam_R_m2c"], dtype="float32").reshape(3, 3)
-                t = np.array(anno["cam_t_m2c"], dtype="float32") / 1000.0
-                pose = np.hstack([R, t.reshape(3, 1)])
-                quat = mat2quat(R).astype("float32")
+                depth_path = osp.join(scene_root, "depth/{:06d}.png".format(int_im_id))
 
-                proj = (record["cam"] @ t.T).T
-                proj = proj[:2] / proj[2]
+                scene_im_id = f"{scene_id}/{int_im_id}"
 
-                bbox_visib = gt_info_dict[str_im_id][anno_i]["bbox_visib"]
-                bbox_obj = gt_info_dict[str_im_id][anno_i]["bbox_obj"]
-                x1, y1, w, h = bbox_visib
-                if self.filter_invalid:
-                    if h <= 1 or w <= 1:
-                        self.num_instances_without_valid_box += 1
-                        continue
+                K = np.array(cam_dict[str_im_id]["cam_K"], dtype=np.float32).reshape(3, 3)
+                depth_factor = 1000.0 / cam_dict[str_im_id]["depth_scale"]  # 10000
 
-                mask_file = osp.join(
-                    scene_root,
-                    "mask/{:06d}_{:06d}.png".format(int_im_id, anno_i),
-                )
-                mask_visib_file = osp.join(
-                    scene_root,
-                    "mask_visib/{:06d}_{:06d}.png".format(int_im_id, anno_i),
-                )
-                assert osp.exists(mask_file), mask_file
-                assert osp.exists(mask_visib_file), mask_visib_file
-                # load mask visib
-                mask_single = mmcv.imread(mask_visib_file, "unchanged")
-                mask_single = mask_single.astype("bool")
-                area = mask_single.sum()
-                if area < 3:  # filter out too small or nearly invisible instances
-                    self.num_instances_without_valid_segmentation += 1
-                mask_rle = binary_mask_to_rle(mask_single, compressed=True)
-
-                # load mask full
-                mask_full = mmcv.imread(mask_file, "unchanged")
-                mask_full = mask_full.astype("bool")
-                mask_full_rle = binary_mask_to_rle(mask_full, compressed=True)
-
-                visib_fract = gt_info_dict[str_im_id][anno_i].get("visib_fract", 1.0)
-
-                inst = {
-                    "category_id": cur_label,  # 0-based label
-                    "bbox": bbox_visib,
-                    "bbox_obj": bbox_obj,
-                    "bbox_mode": BoxMode.XYWH_ABS,
-                    "pose": pose,
-                    "quat": quat,
-                    "trans": t,
-                    "centroid_2d": proj,  # absolute (cx, cy)
-                    "segmentation": mask_rle,
-                    "mask_full": mask_full_rle,
-                    "visib_fract": visib_fract,
-                    "xyz_path": None,  #  no need for test
+                record = {
+                    "dataset_name": self.name,
+                    "file_name": osp.relpath(rgb_path, PROJ_ROOT),
+                    "depth_file": osp.relpath(depth_path, PROJ_ROOT),
+                    "height": self.height,
+                    "width": self.width,
+                    "image_id": int_im_id,
+                    "scene_im_id": scene_im_id,  # for evaluation
+                    "cam": K,
+                    "depth_factor": depth_factor,
+                    "img_type": "real",  # NOTE: has background
                 }
+                insts = []
+                for anno_i, anno in enumerate(gt_dict[str_im_id]):
+                    obj_id = anno["obj_id"]
+                    if obj_id not in self.cat_ids:
+                        continue
+                    cur_label = self.cat2label[obj_id]  # 0-based label
+                    R = np.array(anno["cam_R_m2c"], dtype="float32").reshape(3, 3)
+                    t = np.array(anno["cam_t_m2c"], dtype="float32") / 1000.0
+                    pose = np.hstack([R, t.reshape(3, 1)])
+                    quat = mat2quat(R).astype("float32")
 
-                model_info = self.models_info[str(obj_id)]
-                inst["model_info"] = model_info
-                for key in ["bbox3d_and_center"]:
-                    inst[key] = self.models[cur_label][key]
-                insts.append(inst)
-            if len(insts) == 0:  # filter im without anno
-                continue
-            record["annotations"] = insts
-            dataset_dicts.append(record)
+                    proj = (record["cam"] @ t.T).T
+                    proj = proj[:2] / proj[2]
+
+                    bbox_visib = gt_info_dict[str_im_id][anno_i]["bbox_visib"]
+                    bbox_obj = gt_info_dict[str_im_id][anno_i]["bbox_obj"]
+                    x1, y1, w, h = bbox_visib
+                    if self.filter_invalid:
+                        if h <= 1 or w <= 1:
+                            self.num_instances_without_valid_box += 1
+                            continue
+
+                    mask_file = osp.join(
+                        scene_root,
+                        "mask/{:06d}_{:06d}.png".format(int_im_id, anno_i),
+                    )
+                    mask_visib_file = osp.join(
+                        scene_root,
+                        "mask_visib/{:06d}_{:06d}.png".format(int_im_id, anno_i),
+                    )
+                    assert osp.exists(mask_file), mask_file
+                    assert osp.exists(mask_visib_file), mask_visib_file
+                    # load mask visib
+                    mask_single = mmcv.imread(mask_visib_file, "unchanged")
+                    mask_single = mask_single.astype("bool")
+                    area = mask_single.sum()
+                    if area < 3:  # filter out too small or nearly invisible instances
+                        self.num_instances_without_valid_segmentation += 1
+                    mask_rle = binary_mask_to_rle(mask_single, compressed=True)
+
+                    # load mask full
+                    mask_full = mmcv.imread(mask_file, "unchanged")
+                    mask_full = mask_full.astype("bool")
+                    mask_full_rle = binary_mask_to_rle(mask_full, compressed=True)
+
+                    visib_fract = gt_info_dict[str_im_id][anno_i].get("visib_fract", 1.0)
+
+                    inst = {
+                        "category_id": cur_label,  # 0-based label
+                        "bbox": bbox_visib,
+                        "bbox_obj": bbox_obj,
+                        "bbox_mode": BoxMode.XYWH_ABS,
+                        "pose": pose,
+                        "quat": quat,
+                        "trans": t,
+                        "centroid_2d": proj,  # absolute (cx, cy)
+                        "segmentation": mask_rle,
+                        "mask_full": mask_full_rle,
+                        "visib_fract": visib_fract,
+                        "xyz_path": None,  #  no need for test
+                    }
+
+                    model_info = self.models_info[str(obj_id)]
+                    inst["model_info"] = model_info
+                    for key in ["bbox3d_and_center"]:
+                        inst[key] = self.models[cur_label][key]
+                    insts.append(inst)
+                if len(insts) == 0:  # filter im without anno
+                    continue
+                record["annotations"] = insts
+                dataset_dicts.append(record)
 
         if self.num_instances_without_valid_segmentation > 0:
             logger.warning(
@@ -322,10 +332,10 @@ AMBF_OBJECTS = ["needle"]
 SPLITS_AMBF = dict(
     ambf_suturing=dict(
         name="ambf_suturing",
-        dataset_root=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/train_env1"),
+        dataset_root=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/train_env1_automated1"),
         models_root=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/models"),
         objs=AMBF_OBJECTS,
-        ann_file=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/test_targets_bop19.json"),
+        # ann_file=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/test_targets_bop19.json"),
         scale_to_meter=0.001,
         with_masks=True,  # (load masks but may not use it)
         with_depth=True,  # (load depth path here, but may not use it)
@@ -336,6 +346,25 @@ SPLITS_AMBF = dict(
         num_to_load=-1,
         filter_invalid=False,
         ref_key="ambf_suturing",
+        scene_id_list=list(range(1,19))
+    ),
+    ambf_suturing_test=dict(
+        name="ambf_suturing_test",
+        dataset_root=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/test"),
+        models_root=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/models"),
+        objs=AMBF_OBJECTS,
+        # ann_file=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/test_targets_bop19.json"),
+        scale_to_meter=0.001,
+        with_masks=True,  # (load masks but may not use it)
+        with_depth=True,  # (load depth path here, but may not use it)
+        height=480,
+        width=640,
+        cache_dir=osp.join(PROJ_ROOT, ".cache"),
+        use_cache=True,
+        num_to_load=-1,
+        filter_invalid=False,
+        ref_key="ambf_suturing",
+        scene_id_list=list(range(0,5))
     ),
 )
 

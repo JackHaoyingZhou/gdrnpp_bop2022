@@ -52,7 +52,7 @@ class SimpleDataDictDataset:
         return self.dataset_dicts[idx]["cam"]
 
 if __name__ == "__main__":
-    dataset_name = "ambf_suturing"
+    dataset_name = "ambf_suturing_test"
     dataset = SimpleDataDictDataset(dataset_name)
 
     print(f"Dataset len: {len(dataset)}\n")

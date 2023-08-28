@@ -22,8 +22,8 @@ bop_root = osp.join(data_root, "BOP_DATASETS/")
 # ---------------------------------------------------------------- #
 dataset_root = os.path.join(bop_root, "ambf_suturing")
 
-train = os.path.join(dataset_root, "train_env1")
-test = os.path.join(dataset_root, "train_env1")
+train = os.path.join(dataset_root, "train_env1_automated1")
+test = os.path.join(dataset_root, "test")
 # train_real_dir = os.path.join(dataset_root, "train_real")
 # train_pbr_dir = os.path.join(dataset_root, "train_pbr")  # bbnc6:/data3/BOP2020/dataset_pbr/tudl_train_pbr
 # train_render_dir = osp.join(dataset_root, "train_render")

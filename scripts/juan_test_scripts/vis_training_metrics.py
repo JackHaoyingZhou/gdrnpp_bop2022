@@ -4,8 +4,9 @@ import mmcv
 import json
 import matplotlib.pyplot as plt
 
-default_path = "./output/gdrn/ambf_suturing/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_ambf_suturing/metrics.json"
 # default_path = "./output/gdrn/tudl/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl_juan/metrics.json"
+default_path = "./output/gdrn/ambf_suturing/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_ambf_suturing/metrics.json"
+# default_path = "./output/gdrn/ambf_suturing/classAware_ambf_suturing_env1_automated1/metrics.json"
 
 def on_close(event):
     size = event.canvas.figure.get_size_inches()  # Get the size in inches
