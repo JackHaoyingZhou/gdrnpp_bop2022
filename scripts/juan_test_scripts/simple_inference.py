@@ -35,6 +35,7 @@ import cv2
 from lib.utils.mask_utils import mask2bbox_xyxy, cocosegm2mask, get_edge
 import gdrn_simple.VisUtils as vis_utils
 
+
 def setup(cfg:Config)->Config:
     if cfg.SOLVER.OPTIMIZER_CFG != "":
         if isinstance(cfg.SOLVER.OPTIMIZER_CFG, str):
@@ -54,6 +55,7 @@ def setup(cfg:Config)->Config:
         #         )  # scale weight_decay
 
     return cfg
+
 
 def load_dataset(cfg):
 
@@ -89,6 +91,7 @@ def load_dataset(cfg):
 
     return data_loader
 
+
 def print_metrics():
     print(f"scene_img_id {scene_img_id}")
     print(f"category id {s2[0]['annotations'][0]['category_id']}" )
@@ -105,6 +108,7 @@ def print_metrics():
     print(f"diff")
     print(f"trans diff {gt_trans-pred_trans}")
     print(f"rot diff {gt_rot-pred_rot}")
+
 
 if __name__ == '__main__':
     #pretrained model

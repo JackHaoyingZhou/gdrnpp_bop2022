@@ -33,6 +33,7 @@ cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(
 )
 predictor = DefaultPredictor(cfg)
 
+print(path)
 im = cv2.imread(str(path/"input.jpg"))
 outputs = predictor(im)
 

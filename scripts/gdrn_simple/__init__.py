@@ -17,6 +17,6 @@ print(root_path)
 sys.path.insert(0, str(root_path))
 
 # BOP renderer
-bop_renderer_path = '/home/jbarrag3/research_juan/gdr-net-6dpose/gdrnpp_bop2022_juan/bop_renderer/'
+bop_renderer_path = '/home/jackzhy/bop_renderer/build'
 sys.path.append(bop_renderer_path)
 import bop_renderer #Needs to be here or a import error occurs. Needs investigation 

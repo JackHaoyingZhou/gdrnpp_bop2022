@@ -1,5 +1,5 @@
 import sys
-core_path = "/home/jbarrag3/research_juan/gdr-net-6dpose/gdrnpp_bop2022_juan"
+core_path = "/home/jackzhy/gdrnpp_bop2022"
 sys.path.append(core_path)
 from pathlib import Path
 from mmcv import Config

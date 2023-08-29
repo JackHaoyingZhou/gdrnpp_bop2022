@@ -11,9 +11,9 @@ import math
 import logging
 import timm
 from timm.models.helpers import (
-    load_state_dict_from_hf,
-    load_state_dict_from_url,
-    has_hf_hub,
+    # load_state_dict_from_hf,
+    # load_state_dict_from_url,
+    # has_hf_hub,
     adapt_input_conv,
 )
 from torch.nn.modules.utils import consume_prefix_in_state_dict_if_present

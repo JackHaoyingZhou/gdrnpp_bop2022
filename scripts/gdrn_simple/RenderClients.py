@@ -9,6 +9,7 @@ from lib.egl_renderer.egl_renderer_v3 import EGLRenderer
 from abc import ABC, abstractmethod
 
 
+
 @dataclass
 class RendererClient(ABC):
     renderer_type: str 
@@ -23,6 +24,7 @@ class RendererClient(ABC):
 
     def verify_model_paths(self):
         for m in self.models_path:
+            print(m)
             assert osp.exists(m)
 
     @abstractmethod
