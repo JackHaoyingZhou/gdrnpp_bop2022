@@ -1,6 +1,7 @@
 _base_ = ["../../_base_/gdrn_base.py"]
 
-OUTPUT_DIR = "output/gdrn/ambf_suturing/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_ambf_suturing"
+# OUTPUT_DIR = "output/gdrn/ambf_suturing/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_ambf_suturing"
+OUTPUT_DIR = "output/gdrn/ambf_suturing/classAware_ambf_suturing_env1_automated1"
 INPUT = dict(
     DZI_PAD_SCALE=1.5,
     TRUNCATE_FG=False,
@@ -32,7 +33,7 @@ INPUT = dict(
 
 SOLVER = dict(
     IMS_PER_BATCH=48,
-    TOTAL_EPOCHS=4000,
+    TOTAL_EPOCHS=400,
     LR_SCHEDULER_NAME="flat_and_anneal",
     ANNEAL_METHOD="cosine",  # "cosine"
     ANNEAL_POINT=0.72,
@@ -44,11 +45,11 @@ SOLVER = dict(
 
 DATASETS = dict(
     TRAIN=("ambf_suturing",),
-    TRAIN2=("ambf_suturing",),
-    TRAIN2_RATIO=0.5,
-    TEST=("ambf_suturing",),
+    # TRAIN2=("ambf_suturing",),
+    # TRAIN2_RATIO=0.5,
+    TEST=("ambf_suturing_test",),
     # AP        AP50    AP75    AR      inf.time
-    DET_FILES_TEST=("datasets/BOP_DATASETS/tudl/test/test_bboxes/yolox_x_640_tudl_real_pbr_tudl_bop_test.json",),
+    # DET_FILES_TEST=("datasets/BOP_DATASETS/tudl/test/test_bboxes/yolox_x_640_tudl_real_pbr_tudl_bop_test.json",),
 )
 
 DATALOADER = dict(

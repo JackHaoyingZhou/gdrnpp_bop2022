@@ -91,6 +91,7 @@ def get_model_params(datasets_path, dataset_name, model_type=None):
         "ycbv": list(range(1, 22)),
         "ycbvposecnn": list(range(1, 22)),
         "hope": list(range(1, 29)),
+        'ambf_suturing': [1]
     }[dataset_name]
 
     # ID's of objects with ambiguous views evaluated using the ADI pose error
@@ -129,6 +130,7 @@ def get_model_params(datasets_path, dataset_name, model_type=None):
         "ycbv": [1, 13, 14, 16, 18, 19, 20, 21],  # bop symmetric objs
         "ycbvposecnn": [13, 16, 19, 20, 21],  # posecnn symmetric objs
         "hope": None,  # Not defined yet.
+        "ambf_suturing": [] 
     }[dataset_name]
 
     # T-LESS includes two types of object models, CAD and reconstructed.
@@ -209,6 +211,11 @@ def get_split_params(datasets_path, dataset_name, split, split_type=None):
             p["depth_range"] = (600.90, 1102.35)
             p["azimuth_range"] = (0, 2 * math.pi)
             p["elev_range"] = (0, 0.5 * math.pi)
+
+    # ambf_suturing (LM).
+    if dataset_name == 'ambf_suturing':
+        p['scene_ids'] = {"train":list(range(1,19)), "test":[1,2,3,4]}[split]
+        p['im_size'] = (640, 480)
 
     # Linemod-Occluded (LM-O).
     elif dataset_name == "lmo":
