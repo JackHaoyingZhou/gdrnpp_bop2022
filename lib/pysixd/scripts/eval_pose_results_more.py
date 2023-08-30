@@ -56,6 +56,7 @@ p = {
                 "tyol": 15,
                 "ycbv": 15,
                 "hope": 15,
+                "ambf_suturing": 2
             },
             "vsd_taus": list(np.arange(0.05, 0.51, 0.05)),
             "vsd_normalized_by_diameter": True,
@@ -234,7 +235,9 @@ for result_filename in p["result_filenames"]:
     # Name of the result and the dataset.
     result_name = os.path.splitext(os.path.basename(result_filename))[0]
     if args.dataset == None:
-        dataset = str(result_name.split("_")[1].split("-")[0])
+        # dataset = str(result_name.split("_")[1].split("-")[0])
+        # JUAN CHANGES TO FIX TEST
+        dataset = "ambf_suturing" 
     else:
         dataset = args.dataset
 
