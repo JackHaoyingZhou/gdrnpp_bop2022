@@ -202,8 +202,12 @@ if __name__ == '__main__':
         ## Create renderer
         pred_rgb, ren_depth = renderer.render(obj_id, K, est_pose)
         gt_rgb, gt_depth = renderer.render(obj_id, K, gt_pose)
-        
+
+        # Vis gt and pred        
         vis_im = vis_utils.vis_gt_and_pred(im, gt_rgb, pred_rgb)
+        # vis only pred 
+        # vis_im = vis_utils.add_ren_mask_to_img(im, pred_rgb, vis_utils.ColorCV.GREEN)
+
         # pred_rgb = cv2.addWeighted(im, 0.3, gt_rgb, 0.7, 0)
 
 

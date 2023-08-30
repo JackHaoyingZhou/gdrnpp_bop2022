@@ -41,14 +41,23 @@ def combine_img_and_masks(rgb_im:np.ndarray, mask_list:List[Tuple[np.ndarray,Col
         vis[mask != 0] = np.array(color.value)
     return vis
 
-def vis_gt_and_pred(rgb_im:np.ndarray, gt_rgb:np.ndarray, pred_rgb:np.ndarray)->np.ndarray:
-    gt_mask = cal_projection_mask(gt_rgb)
-    pred_mask = cal_projection_mask(pred_rgb)
-
-    mask_list = [(gt_mask, ColorCV.RED), (pred_mask, ColorCV.GREEN)]
+def add_ren_mask_to_img(rgb_im:np.ndarray, rendered_rgb:np.ndarray, color:Color)->np.ndarray:
+    mask = cal_projection_mask(rendered_rgb)
+    mask_list = [(mask, color)]
     vis = combine_img_and_masks(rgb_im, mask_list)
+    return vis
 
-    # Annotate using PIL
+def vis_gt_and_pred(rgb_im:np.ndarray, gt_rgb:np.ndarray, pred_rgb:np.ndarray)->np.ndarray:
+    vis = add_ren_mask_to_img(rgb_im, gt_rgb, ColorCV.RED)
+    vis = add_ren_mask_to_img(vis, pred_rgb, ColorCV.GREEN)
+
+    # gt_mask = cal_projection_mask(gt_rgb)
+    # pred_mask = cal_projection_mask(pred_rgb)
+
+    # mask_list = [(gt_mask, ColorCV.RED), (pred_mask, ColorCV.GREEN)]
+    # vis = combine_img_and_masks(rgb_im, mask_list)
+
+    # # Annotate using PIL
     vis = cv2.cvtColor(vis, cv2.COLOR_BGR2RGB)
     vis = annotate_img(vis)
     vis = cv2.cvtColor(vis, cv2.COLOR_RGB2BGR)
