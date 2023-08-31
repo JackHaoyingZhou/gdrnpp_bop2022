@@ -17,6 +17,9 @@ class DatasetConfig:
                                        f"obj_{obj_id:06d}.ply") for obj_id in id2obj]
         self._OBJID = list(id2obj.keys())
 
+        for p in self._MODEL_PATHS:
+            assert osp.exists(p), f"Model path {p} does not exist"
+
     @property
     def ID2OBJ(self):
         return self._ID2OBJ 
