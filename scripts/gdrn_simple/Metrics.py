@@ -154,7 +154,11 @@ class ErrorRecord:
             d1.update({"total": self.p_op.apply_op(op, self.df[error_metric.name])})
             table_data.append(d1)
 
-        table = MarkdownTable(headers=["scene_id"]+scene_ids_list+["total"]) 
+        # If there are too many scene_ids, the table will be too wide
+        # table = MarkdownTable(headers=["scene_id"]+scene_ids_list+["total"]) 
+
+        # Only use first and second and total column
+        table = MarkdownTable(headers=["scene_id"]+["total"]) 
         for d1 in table_data:
             table.add_data(**d1)
 
