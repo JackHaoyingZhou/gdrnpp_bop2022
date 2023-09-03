@@ -1,5 +1,4 @@
 # Installation instructions
-Notes about the installation process. The environement has many dependencies and was not that easy to install. Detectron is precompiled against specific versions of pytorch and cuda. If a new version of pytorch is needed detectron also needs to be updated.
 
 ### ENVIRONMENT
 OS: Ubuntu 20.04
@@ -18,8 +17,14 @@ gdrn_root/
         └── VOC2012
 ```
 
+VOCdevkit can be downloaded from this [webpage](https://pjreddie.com/projects/pascal-voc-dataset-mirror/) or using the following command:
+
+```bash
+wget http://pjreddie.com/media/files/VOC2012test.tar
+```
+
 ## Instructions
-Instructions to install python dependencies.
+Instructions to install python dependencies. Note that the environment has many dependencies and therefore, it might not not be easy to install.. Detectron is precompiled against specific versions of pytorch and cuda. If a new version of pytorch is needed detectron also needs to be updated.
 
 ``` bash
 #1. create conda env

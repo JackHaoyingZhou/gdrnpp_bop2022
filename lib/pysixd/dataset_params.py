@@ -214,7 +214,7 @@ def get_split_params(datasets_path, dataset_name, split, split_type=None):
 
     # ambf_suturing (LM).
     if dataset_name == 'ambf_suturing':
-        p['scene_ids'] = {"train":list(range(1,19)), "test":[1,2,3,4]}[split]
+        p['scene_ids'] = {"train":list(range(1,19)), "test":[0,1,2,3,4]}[split]
         p['im_size'] = (640, 480)
 
     # Linemod-Occluded (LM-O).

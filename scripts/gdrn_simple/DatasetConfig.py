@@ -4,6 +4,7 @@ import os.path as osp
 def get_dataset_config(name:str):
     dataset_dicts ={
         "ambf_suturing": DatasetConfig("ambf_suturing", "ambf_suturing", {1: "needle"}),
+        "ambf_suturing_test": DatasetConfig("ambf_suturing_test", "ambf_suturing", {1: "needle"}),
         "tudl_bop_test": DatasetConfig("tudl_bop_test", "tudl", {1: "dragon", 2: "frog", 3: "can"}),
     } 
     return dataset_dicts[name]
@@ -16,6 +17,9 @@ class DatasetConfig:
         self._MODEL_PATHS = [osp.join(datasets_path, self._DATA_ROOT, "models",
                                        f"obj_{obj_id:06d}.ply") for obj_id in id2obj]
         self._OBJID = list(id2obj.keys())
+
+        for p in self._MODEL_PATHS:
+            assert osp.exists(p), f"Model path {p} does not exist"
 
     @property
     def ID2OBJ(self):

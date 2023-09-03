@@ -332,7 +332,7 @@ AMBF_OBJECTS = ["needle"]
 SPLITS_AMBF = dict(
     ambf_suturing=dict(
         name="ambf_suturing",
-        dataset_root=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/train_env1_automated1"),
+        dataset_root=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/train"),
         models_root=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/models"),
         objs=AMBF_OBJECTS,
         # ann_file=osp.join(DATASETS_ROOT, "BOP_DATASETS/ambf_suturing/test_targets_bop19.json"),
@@ -346,7 +346,7 @@ SPLITS_AMBF = dict(
         num_to_load=-1,
         filter_invalid=False,
         ref_key="ambf_suturing",
-        scene_id_list=list(range(1,19))
+        scene_id_list=list(range(1,40))
     ),
     ambf_suturing_test=dict(
         name="ambf_suturing_test",
@@ -364,7 +364,7 @@ SPLITS_AMBF = dict(
         num_to_load=-1,
         filter_invalid=False,
         ref_key="ambf_suturing",
-        scene_id_list=list(range(0,5))
+        scene_id_list=list(range(1,25))
     ),
 )
 

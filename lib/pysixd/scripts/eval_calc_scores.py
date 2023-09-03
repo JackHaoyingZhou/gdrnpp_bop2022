@@ -159,9 +159,9 @@ for error_dir_path in p["error_dir_paths"]:
     result_info = osp.basename(osp.dirname(error_dir_path)).split("_")
     method = result_info[0]
     dataset_info = result_info[1].split("-")
-    dataset = dataset_info[0]
-    split = dataset_info[1]
-    split_type = dataset_info[2] if len(dataset_info) > 2 else None
+    dataset ="ambf_suturing" #dataset_info[0] # JUAN CHANGES TO FIX TEST
+    split = "test" #dataset_info[1]
+    split_type = None #dataset_info[2] if len(dataset_info) > 2 else None
 
     # Evaluation signature.
     score_sign = misc.get_score_signature(p["correct_th"][err_type], p["visib_gt_min"])

@@ -1,7 +1,7 @@
 _base_ = ["../../_base_/gdrn_base.py"]
 
 # OUTPUT_DIR = "output/gdrn/ambf_suturing/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_ambf_suturing"
-OUTPUT_DIR = "output/gdrn/ambf_suturing/classAware_ambf_suturing_env1_automated1"
+OUTPUT_DIR = "output/gdrn/ambf_suturing/classAware_ambf_suturing_v0.0.1"
 INPUT = dict(
     DZI_PAD_SCALE=1.5,
     TRUNCATE_FG=False,
@@ -33,7 +33,7 @@ INPUT = dict(
 
 SOLVER = dict(
     IMS_PER_BATCH=48,
-    TOTAL_EPOCHS=400,
+    TOTAL_EPOCHS=450,
     LR_SCHEDULER_NAME="flat_and_anneal",
     ANNEAL_METHOD="cosine",  # "cosine"
     ANNEAL_POINT=0.72,
