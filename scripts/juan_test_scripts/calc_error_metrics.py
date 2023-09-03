@@ -48,7 +48,8 @@ class ErrorMetricsCalculator:
     def get_error_metrics(self)->Dict[ERH, List[Any]]:
         return self.data 
 
-pred_path = "./output/gdrn/ambf_suturing/classAware_ambf_suturing_env1_automated1/inference_model_final/ambf_suturing_test/convnext-a6-AugCosyAAEGray-BG05-mlL1-DMask-amodalClipBox-classAware-ambf-suturing-test-iter0_ambf_suturing-test.csv" 
+# pred_path = "./output/gdrn/ambf_suturing/classAware_ambf_suturing_env1_automated1/inference_model_final/ambf_suturing_test/convnext-a6-AugCosyAAEGray-BG05-mlL1-DMask-amodalClipBox-classAware-ambf-suturing-test-iter0_ambf_suturing-test.csv" 
+pred_path = "./output/gdrn/ambf_suturing/classAware_ambf_suturing_v0.0.1/inference_model_final/ambf_suturing_test/convnext-a6-AugCosyAAEGray-BG05-mlL1-DMask-amodalClipBox-classAware-ambf-suturing-test-iter0_ambf_suturing-test.csv" 
 
 def main():
     global pred_path 
