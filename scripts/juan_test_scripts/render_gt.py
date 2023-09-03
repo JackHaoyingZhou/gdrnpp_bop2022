@@ -6,7 +6,7 @@ import cv2
 
 width = 640
 height = 480
-name = "ambf_suturing"
+name = "ambf_suturing_test"
 # name = "tudl_bop_test"
 
 def main():
@@ -15,26 +15,33 @@ def main():
     print(dataset.get_stored_keys())
     print(dataset[0]["annotations"][0].keys())
     print(len(dataset[0]["annotations"]))
-
-    rgb_im = dataset.get_rgb(0)
-    pose = dataset.get_pose(0)
-    K = dataset.get_intrinsic(0)
-
-    print(rgb_im.shape)
-    print(pose)
-    print(K)
-    print(f"obj_id {dataset[0]['annotations'][0]['category_id']}")
+    print(f"Dataset len: {len(dataset)}\n")
 
     # Two renderer options 
     renderer = MyCppRenderer("cpp", dataset_cfg.MODEL_PATHS, dataset_cfg.OBJID, width=width, height=height)
     # renderer = MyEGLRenderer("EGL", dataset_cfg.MODEL_PATHS, dataset_cfg.OBJID, width=width, height=height)
 
-    obj_id = dataset[0]["annotations"][0]["category_id"] # Zero indexed
-    ren_rgb, ren_depth = renderer.render(obj_id, K, pose)
+    for i in range(len(dataset)):
+        rgb_im = dataset.get_rgb(i)
+        pose = dataset.get_pose(i)
+        K = dataset.get_intrinsic(i)
 
-    blended = cv2.addWeighted(rgb_im, 0.3, ren_rgb, 0.7, 0)
-    cv2.imshow("rgb", blended)
-    cv2.waitKey(0)
+        print(rgb_im.shape)
+        print(pose)
+        print(K)
+        print(f"obj_id {dataset[0]['annotations'][0]['category_id']}")
+
+
+        obj_id = dataset[0]["annotations"][0]["category_id"] # Zero indexed
+        ren_rgb, ren_depth = renderer.render(obj_id, K, pose)
+
+        blended = cv2.addWeighted(rgb_im, 0.3, ren_rgb, 0.7, 0)
+        cv2.imshow("rgb", blended)
+        k = cv2.waitKey(0)
+
+        if k == ord("q"):
+            break
+
     cv2.destroyAllWindows()
 
 

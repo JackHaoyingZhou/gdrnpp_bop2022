@@ -4,6 +4,7 @@ import os.path as osp
 def get_dataset_config(name:str):
     dataset_dicts ={
         "ambf_suturing": DatasetConfig("ambf_suturing", "ambf_suturing", {1: "needle"}),
+        "ambf_suturing_test": DatasetConfig("ambf_suturing_test", "ambf_suturing", {1: "needle"}),
         "tudl_bop_test": DatasetConfig("tudl_bop_test", "tudl", {1: "dragon", 2: "frog", 3: "can"}),
     } 
     return dataset_dicts[name]
