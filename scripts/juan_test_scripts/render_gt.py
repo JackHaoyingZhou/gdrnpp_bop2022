@@ -18,8 +18,8 @@ def main():
     print(f"Dataset len: {len(dataset)}\n")
 
     # Two renderer options 
-    renderer = MyCppRenderer("cpp", dataset_cfg.MODEL_PATHS, dataset_cfg.OBJID, width=width, height=height)
-    # renderer = MyEGLRenderer("EGL", dataset_cfg.MODEL_PATHS, dataset_cfg.OBJID, width=width, height=height)
+    # renderer = MyCppRenderer("cpp", dataset_cfg.MODEL_PATHS, dataset_cfg.OBJID, width=width, height=height)
+    renderer = MyEGLRenderer("EGL", dataset_cfg.MODEL_PATHS, dataset_cfg.OBJID, width=width, height=height)
 
     for i in range(len(dataset)):
         rgb_im = dataset.get_rgb(i)

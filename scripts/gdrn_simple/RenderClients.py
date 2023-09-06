@@ -44,11 +44,14 @@ class RendererClient(ABC):
 class MyEGLRenderer(RendererClient):
 
     def create_render(self):
+        print("WARNING: EGLRenderer has some hardcoded values for the near and far plane.")
         ren = EGLRenderer(self.models_path,
                         vertex_scale=0.001,
                         use_cache=True,
                         width=self.width,
                         height=self.height,
+                        znear=0.01,
+                        zfar=10.0,
                         )
         return ren
 
