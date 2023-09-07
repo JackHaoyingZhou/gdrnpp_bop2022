@@ -85,6 +85,16 @@ cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$(which pytho
 cmake --build build
 ```
 
+Ensure you have the compiled library by executing
+```bash
+ls bop_renderer/*.so
+```
+which should print
+```bash
+bop_renderer/bop_renderer.cpython-39-x86_64-linux-gnu.so
+```
+
+
 ## Testing installation with GDRN simple scripts
 
 The following scripts should run after setting up the dataset and the anaconda environment. All commands below assume you are located in the root folder of the gdrnpp repo. Make sure to install `gdrnsimple` with 
@@ -125,3 +135,13 @@ gdrn test
 ```bash
 ./core/gdrn_modeling/test_gdrn.sh configs/gdrn/tudl/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl.py 0 ./output/pretrained/tudl/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl/model_final_wo_optim.pth
 ```
+
+
+## Troubleshooting:
+
+* **Your dataloader is trying to load unexisting data.**
+
+Make sure to erase the .cache folder inside on your root directory. Dataset paths are cached meaning that
+changes in the dataset folder won't be reflected in the dataloader.
+
+

@@ -141,7 +141,7 @@ class ErrorRecord:
         scene_ids_list = scene_ids_list.tolist()
 
         # operations = ["N", "mean", "std", "min", "max"]
-        operations = [self.p_op.N, self.p_op.mean, self.p_op.std, self.p_op.min, self.p_op.max]  
+        operations = [self.p_op.N, self.p_op.mean, self.p_op.std, self.p_op.median, self.p_op.min, self.p_op.max]  
         table_data = []
         for op in operations:
             d1 = {"scene_id": op.name}

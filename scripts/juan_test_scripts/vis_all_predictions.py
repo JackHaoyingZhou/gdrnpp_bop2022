@@ -18,7 +18,9 @@ pred_path = "./output/gdrn/ambf_suturing/classAware_ambf_suturing_v0.0.1/inferen
 
 def main():
     global pred_path 
-    pred_path = Path(pred_path)
+    pred_path = Path(pred_path).resolve()
+    vis_path = pred_path.parent / "vis_only_pred"
+    vis_path.mkdir(exist_ok=True, parents=True)
 
     dataset_cfg = get_dataset_config("ambf_suturing")
     dataset = data_utils.SimpleDataDictDataset("ambf_suturing_test")
@@ -52,13 +54,20 @@ def main():
         # Render the prediction 
         pred_rgb, pred_depth = renderer.render(obj_id, K, pred_pose)
 
-        vis = vis_utils.vis_gt_and_pred(rgb_im, gt_rgb, pred_rgb)
+        # Visualization options
+        # vis = vis_utils.vis_gt_and_pred(rgb_im, gt_rgb, pred_rgb)
         # vis = vis_utils.vis_gt_and_pred_option2(rgb_im, gt_rgb, pred_rgb)
 
-        cv2.imshow(f"rgb", vis)
-        key = cv2.waitKey(0)
-        if key == ord("q"):
-            break
+        # vis only pred 
+        vis = vis_utils.add_ren_mask_to_img(rgb_im, pred_rgb, vis_utils.ColorCV.GREEN)
+
+        img_name = str(vis_path / ("_".join(scene_im_id.split("/"))+".png" ))
+        cv2.imwrite(img_name, vis)
+
+        # cv2.imshow(f"rgb", vis)
+        # key = cv2.waitKey(0)
+        # if key == ord("q"):
+        #     break
 
     cv2.destroyAllWindows()
 
