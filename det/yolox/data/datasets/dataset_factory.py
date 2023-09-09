@@ -23,6 +23,7 @@ from . import (
     itodd_d2,
     itodd_bop_test,
 )  # noqa
+from core.gdrn_modeling.datasets import ambf_suturing
 
 cur_dir = osp.dirname(osp.abspath(__file__))
 # from lib.utils.utils import iprint
@@ -53,6 +54,7 @@ _DSET_MOD_NAMES = [
     "itodd_pbr",
     "itodd_d2",
     "itodd_bop_test",
+    "ambf_suturing"
 ]
 
 logger = logging.getLogger(__name__)
