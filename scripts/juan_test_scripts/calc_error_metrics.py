@@ -92,6 +92,10 @@ def main():
         table = error_record.generate_summary_table(metric)
         print(f"## {metric.value} table")
         table.print(floatfmt="0.2f")
+    
+    error_metrics_path = (Path(pred_path).parent / "error_metrics.csv").resolve()
+
+    df.to_csv(error_metrics_path, index=False)
 
 if __name__ == "__main__":
     main()
