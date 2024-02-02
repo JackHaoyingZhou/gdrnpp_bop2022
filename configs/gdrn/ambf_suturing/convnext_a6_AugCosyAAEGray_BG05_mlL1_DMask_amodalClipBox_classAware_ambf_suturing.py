@@ -1,7 +1,7 @@
 _base_ = ["../../_base_/gdrn_base.py"]
 
 # OUTPUT_DIR = "output/gdrn/ambf_suturing/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_ambf_suturing"
-OUTPUT_DIR = "output/gdrn/ambf_suturing/classAware_ambf_suturing_v0.0.1"
+OUTPUT_DIR = "output/gdrn/ambf_suturing/classAware_ambf_suturing_v0.0.2"
 INPUT = dict(
     DZI_PAD_SCALE=1.5,
     TRUNCATE_FG=False,
@@ -50,16 +50,17 @@ DATASETS = dict(
     TEST=("ambf_suturing_test",),
     # AP        AP50    AP75    AR      inf.time
     # DET_FILES_TEST=("datasets/BOP_DATASETS/tudl/test/test_bboxes/yolox_x_640_tudl_real_pbr_tudl_bop_test.json",),
+    DET_FILES_TEST=("datasets/BOP_DATASETS/ambf_suturing/yolox_ambf_suturing_test_bop.json",),
 )
-
 DATALOADER = dict(
+
     # Number of data loading threads
     NUM_WORKERS=8,
     FILTER_VISIB_THR=0.3,
 )
 
 MODEL = dict(
-    LOAD_DETS_TEST=False, #Juan 
+    LOAD_DETS_TEST=True, #Juan 
     PIXEL_MEAN=[0.0, 0.0, 0.0],
     PIXEL_STD=[255.0, 255.0, 255.0],
     BBOX_TYPE="AMODAL_CLIP",  # VISIB or AMODAL
@@ -143,4 +144,11 @@ VAL = dict(
     USE_BOP=True,  # whether to use bop toolkit
 )
 
-TEST = dict(EVAL_PERIOD=0, VIS=False, TEST_BBOX_TYPE="gt")  # gt | est
+TEST = dict(EVAL_PERIOD=0, VIS=False, TEST_BBOX_TYPE="est")  # gt | est
+
+"""
+# Loading detection from est needs three changes
+1. DATASETS.DET_FILES_TEST = ("datasets/BOP_DATASETS/tudl/test/test_bboxes/yolox_x_640_tudl_real_pbr_tudl_bop_test.json",)
+2. MODEL.LOAD_DETS_TEST = True
+3. TEST.TEST_BBOX_TYPE = "est"
+"""

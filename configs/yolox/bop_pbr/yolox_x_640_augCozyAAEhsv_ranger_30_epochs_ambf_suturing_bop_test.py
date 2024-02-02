@@ -20,7 +20,7 @@ train.amp.enabled = True
 model.backbone.depth = 1.33
 model.backbone.width = 1.25
 
-model.head.num_classes = 3
+model.head.num_classes = 1
 
 train.init_checkpoint = "pretrained_models/yolox/yolox_x.pth"
 
