@@ -4,7 +4,8 @@ from tqdm import tqdm
 
 import json
 
-path = "datasets/BOP_DATASETS/tudl/test/test_bboxes/yolov4_tudl_real_pbr.json"
+# path = "datasets/BOP_DATASETS/tudl/test/test_bboxes/yolov4_tudl_real_pbr.json"
+path = "./output/yolox/bop_pbr/yolox_x_640_augCozyAAEhsv_ranger_30_epochs_ambf_suturing_bop_test/inference/ambf_suturing_test/coco_instances_results_bop.json"
 ds = mmcv.load(path)
 
 outs = {}
@@ -66,4 +67,6 @@ def save_json(path, content, sort=False):
             json.dump(content, f, sort_keys=True)
 
 
-save_json("datasets/BOP_DATASETS/tudl/test/test_bboxes/yolov4_tudl_real_pbr_bop.json", outs)
+# save_json("datasets/BOP_DATASETS/tudl/test/test_bboxes/yolov4_tudl_real_pbr_bop.json", outs)
+out_path = "./output/yolox/bop_pbr/yolox_x_640_augCozyAAEhsv_ranger_30_epochs_ambf_suturing_bop_test/inference/ambf_suturing_test/yolox_ambf_suturing_test_bop.json"
+save_json(out_path, outs)

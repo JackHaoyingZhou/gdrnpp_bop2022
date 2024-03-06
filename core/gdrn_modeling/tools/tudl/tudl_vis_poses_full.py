@@ -24,7 +24,8 @@ score_thr = 0.3
 colors = colormap(rgb=False, maximum=255)
 
 # object info
-id2obj = {1: "dragon", 2: "frog", 3: "can"}
+# id2obj = {1: "dragon", 2: "frog", 3: "can"}
+id2obj = {1: "needle"}
 objects = list(id2obj.values())
 
 
@@ -46,7 +47,8 @@ tensor_kwargs = {"device": torch.device("cuda"), "dtype": torch.float32}
 image_tensor = torch.empty((height, width, 4), **tensor_kwargs).detach()
 seg_tensor = torch.empty((height, width, 4), **tensor_kwargs).detach()
 
-model_dir = "datasets/BOP_DATASETS/tudl/models/"
+# model_dir = "datasets/BOP_DATASETS/tudl/models/"
+model_dir = "datasets/BOP_DATASETS/ambf_suturing/models/"
 
 model_paths = [osp.join(model_dir, f"obj_{obj_id:06d}.ply") for obj_id in id2obj]
 
@@ -56,6 +58,8 @@ ren = EGLRenderer(
     use_cache=True,
     width=width,
     height=height,
+    znear=0.01,
+    zfar=10.0,
 )
 
 # pred_path = osp.join(
@@ -66,14 +70,24 @@ ren = EGLRenderer(
 
 # bbox_path = "datasets/BOP_DATASETS/tudl/test/test_bboxes/yolov4_tudl_pbr_bop.json"
 
-pred_path = osp.join(
-    "output/gdrn/tudl/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl/",
-    "inference_model_final_wo_optim/tudl_bop_test/",
-    "convnext-a6-AugCosyAAEGray-BG05-mlL1-DMask-amodalClipBox-classAware-tudl-test-iter0_tudl-test.csv",
-)
-vis_dir = "output/gdrn/tudl/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl/vis"
+# pred_path = osp.join(
+#     "output/gdrn/tudl/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl/",
+#     "inference_model_final_wo_optim/tudl_bop_test/",
+#     "convnext-a6-AugCosyAAEGray-BG05-mlL1-DMask-amodalClipBox-classAware-tudl-test-iter0_tudl-test.csv",
+# )
+# vis_dir = "output/gdrn/tudl/convnext_a6_AugCosyAAEGray_BG05_mlL1_DMask_amodalClipBox_classAware_tudl/vis"
 
-bbox_path = "datasets/BOP_DATASETS/tudl/test/test_bboxes/yolox_x_640_tudl_pbr_tudl_bop_test.json"
+# bbox_path = "datasets/BOP_DATASETS/tudl/test/test_bboxes/yolox_x_640_tudl_pbr_tudl_bop_test.json"
+
+
+pred_path = osp.join(
+    "output/gdrn/ambf_suturing/classAware_ambf_suturing_v0.0.2",
+    "inference_model_final_v001/ambf_suturing_test/",
+    "convnext-a6-AugCosyAAEGray-BG05-mlL1-DMask-amodalClipBox-classAware-ambf-suturing-test-iter0_ambf_suturing-test.csv",
+)
+vis_dir = "output/gdrn/ambf_suturing/classAware_ambf_suturing_v0.0.2/inference_model_final/ambf_suturing_test/vis"
+
+bbox_path = "datasets/BOP_DATASETS/ambf_suturing/yolox_ambf_suturing_test_bop.json"
 
 mmcv.mkdir_or_exist(vis_dir)
 
@@ -91,7 +105,10 @@ for item in preds_csv:
         preds[im_key] = []
     preds[im_key].append(item)
 
-dataset_name = "tudl_bop_test"
+# dataset_name = "tudl_bop_test"
+
+dataset_name = "ambf_suturing_test"
+print(dataset_name)
 print(dataset_name)
 register_datasets([dataset_name])
 

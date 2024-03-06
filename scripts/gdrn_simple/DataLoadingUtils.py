@@ -1,5 +1,5 @@
 
-
+import gdrn_simple
 from pathlib import Path
 import sys
 import mmcv
@@ -52,7 +52,7 @@ class SimpleDataDictDataset:
         return self.dataset_dicts[idx]["cam"]
 
 if __name__ == "__main__":
-    dataset_name = "ambf_suturing_test"
+    dataset_name = "ambf_suturing"
     dataset = SimpleDataDictDataset(dataset_name)
 
     print(f"Dataset len: {len(dataset)}\n")

@@ -346,7 +346,7 @@ SPLITS_AMBF = dict(
         num_to_load=-1,
         filter_invalid=False,
         ref_key="ambf_suturing",
-        scene_id_list=list(range(1,40))
+        scene_id_list=list(range(1,81))
     ),
     ambf_suturing_test=dict(
         name="ambf_suturing_test",
@@ -364,7 +364,7 @@ SPLITS_AMBF = dict(
         num_to_load=-1,
         filter_invalid=False,
         ref_key="ambf_suturing",
-        scene_id_list=list(range(1,25))
+        scene_id_list=list(range(1,26))
     ),
 )
 

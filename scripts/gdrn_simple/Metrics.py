@@ -66,6 +66,8 @@ class ErrorRecordHeader(Enum):
     scene_id = auto()
     im_id = auto()
     obj_id = auto()
+    visib_fract = "Visibility fraction"
+    dist_to_cam = "Distance to camera (m)"
     # Rotation and translation error
     re = "rotation error (deg)"
     te = "translation error (mm)" 
@@ -123,10 +125,13 @@ class ErrorRecord:
         for key, list_of_vals in data.items():
             self.data_dict[key].extend(list_of_vals)
 
-    def generate_df(self)->pd.DataFrame:
+    def generate_df(self, visb_fract_thresh=0.3)->pd.DataFrame:
         processed_dict = self.replace_enum_for_str(self.data_dict) 
         processed_dict = self.remove_empty_cols(processed_dict)
         self.df = pd.DataFrame(processed_dict)
+
+        # Remove rows with visib_fract < 0.3
+        self.df = self.df.loc[self.df[self.ERH.visib_fract.name] > visb_fract_thresh]
 
         return self.df
     

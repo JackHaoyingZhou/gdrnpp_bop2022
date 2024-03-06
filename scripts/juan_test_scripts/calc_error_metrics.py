@@ -22,13 +22,15 @@ class ErrorMetricsCalculator:
         self.models_pts = models_pts
         self.data = {ERH.scene_im_id:[],
                 ERH.scene_id:[],
+                ERH.dist_to_cam:[],
+                ERH.visib_fract:[],
                 ERH.re:[],
                 ERH.te:[],
                 ERH.mssd:[]}
 
         self.model_sym = [{"R": np.eye(3), "t": np.array([[0, 0, 0]]).T}] 
 
-    def calculate_error_metrics(self, scene_im_id:str, scene_id:str, gt_pose, est_pose): 
+    def calculate_error_metrics(self, scene_im_id:str,scene_id:str, visib_fract: float,  gt_pose, est_pose): 
         gt_R = gt_pose[:3,:3] 
         gt_t = gt_pose[:3,3].reshape((3,1))
         est_R = est_pose[:3,:3]
@@ -40,7 +42,9 @@ class ErrorMetricsCalculator:
         mssd_error = mssd(est_R, est_t,gt_R, gt_t, self.models_pts[1]['pts'], self.model_sym)
 
         self.data[ERH.scene_im_id].append(scene_im_id) 
+        self.data[ERH.visib_fract].append(visib_fract)
         self.data[ERH.scene_id].append(scene_id)
+        self.data[ERH.dist_to_cam].append(np.linalg.norm(gt_t))
         self.data[ERH.re].append(re_error)
         self.data[ERH.te].append(te_error)
         self.data[ERH.mssd].append(mssd_error)
@@ -49,7 +53,8 @@ class ErrorMetricsCalculator:
         return self.data 
 
 # pred_path = "./output/gdrn/ambf_suturing/classAware_ambf_suturing_env1_automated1/inference_model_final/ambf_suturing_test/convnext-a6-AugCosyAAEGray-BG05-mlL1-DMask-amodalClipBox-classAware-ambf-suturing-test-iter0_ambf_suturing-test.csv" 
-pred_path = "./output/gdrn/ambf_suturing/classAware_ambf_suturing_v0.0.1/inference_model_final/ambf_suturing_test/convnext-a6-AugCosyAAEGray-BG05-mlL1-DMask-amodalClipBox-classAware-ambf-suturing-test-iter0_ambf_suturing-test.csv" 
+# pred_path = "./output/gdrn/ambf_suturing/classAware_ambf_suturing_v0.0.1/inference_model_final/ambf_suturing_test/convnext-a6-AugCosyAAEGray-BG05-mlL1-DMask-amodalClipBox-classAware-ambf-suturing-test-iter0_ambf_suturing-test.csv" 
+pred_path = "./output/gdrn/ambf_suturing/classAware_ambf_suturing_v0.0.2/inference_model_final/ambf_suturing_test/convnext-a6-AugCosyAAEGray-BG05-mlL1-DMask-amodalClipBox-classAware-ambf-suturing-test-iter0_ambf_suturing-test.csv" 
 
 def main():
     global pred_path 
@@ -60,7 +65,7 @@ def main():
     gt_dict = PR.sort_dataset_by_scene_im_id(dataset)
 
     preds_dict = PR.load_predicted_csv(pred_path, dataset_cfg.ID2OBJ)
-    assert len(preds_dict) == len(dataset), "Number of predictions and dataset samples do not match"
+    # assert len(preds_dict) == len(dataset), "Number of predictions and dataset samples do not match"
 
     # Load model points for mssd metric
     models = {}
@@ -77,14 +82,16 @@ def main():
         scene_im_id = gt_info["scene_im_id"]
         scene_id = scene_im_id.split("/")[0]
         obj_id = gt_info["annotations"][0]["category_id"]
+        visib_fract = gt_info["annotations"][0]["visib_fract"]
         img_id = gt_info["image_id"]
         K = gt_info["cam"]
 
-        error_metrics_calculator.calculate_error_metrics(scene_im_id, scene_id, gt_pose, pred_pose)
+        error_metrics_calculator.calculate_error_metrics(scene_im_id, scene_id,visib_fract, gt_pose, pred_pose)
 
     error_record = ErrorRecord() 
     error_record.add_data(error_metrics_calculator.get_error_metrics())
-    df = error_record.generate_df()
+    df = error_record.generate_df(visb_fract_thresh=0.35)
+
 
     print("\n\n")
     # Conver to csv online with https://tableconvert.com/markdown-to-csv

@@ -24,7 +24,7 @@ wget http://pjreddie.com/media/files/VOC2012test.tar
 ```
 
 ## Instructions
-Instructions to install python dependencies. Note that the environment has many dependencies and therefore, it might not not be easy to install.. Detectron is precompiled against specific versions of pytorch and cuda. If a new version of pytorch is needed detectron also needs to be updated.
+Instructions to install python dependencies. Note that the environment has many dependencies and therefore, it might not not be easy to install. Detectron is precompiled against specific versions of pytorch and cuda. If a new version of pytorch is needed detectron also needs to be updated. Based on the prebuilt table shown [here](https://detectron2.readthedocs.io/en/latest/tutorials/install.html#install-pre-built-detectron2-linux-only) we decided to use here torch 1.10 with cuda 11.3
 
 ``` bash
 #1. create conda env
